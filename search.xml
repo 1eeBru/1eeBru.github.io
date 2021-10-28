@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>LCP1106题解</title>
+      <link href="/2021/10/29/LCP1106%E9%A2%98%E8%A7%A3/"/>
+      <url>/2021/10/29/LCP1106%E9%A2%98%E8%A7%A3/</url>
+      
+        <content type="html"><![CDATA[<h1>解析布尔表达式</h1><p><strong>题目：</strong></p><p>给你一个以字符串形式表述的 布尔表达式（boolean） expression，返回该式的运算结果。</p><p>有效的表达式需遵循以下约定：</p><ul><li>“t”，运算结果为 True</li><li>“f”，运算结果为 False</li><li>“!(expr)”，运算过程为对内部表达式 expr 进行逻辑 非的运算（NOT）</li><li>“&amp;(expr1,expr2,…)”，运算过程为对 2 个或以上内部表达式 expr1, expr2, … 进行逻辑 与的运算（AND）</li><li>“|(expr1,expr2,…)”，运算过程为对 2 个或以上内部表达式 expr1, expr2, … 进行逻辑 或的运算（OR）</li></ul><p><strong>思路：</strong></p><p>本题类似于四则运算，所以可以考虑使用 Dijkstra 双栈算法，使用双栈算法实现简单运算的代码可以参考 <a href="https://blog.csdn.net/ZJ_DE/article/details/79670208?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522163541645416780366591760%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=163541645416780366591760&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-79670208.pc_search_result_control_group&amp;utm_term=%E5%8F%8C%E6%A0%88%E7%AE%97%E6%B3%95&amp;spm=1018.2226.3001.4187">Dijkstra双栈算法</a>。</p><p>在本题当中，我们需要遍历表达式，</p><ul><li>遇到操作符入栈</li><li>遇到左括号入栈</li><li>遇到操作数入栈</li><li>遇到右括号弹出操作符，再依次弹出操作数直到遇到左括号，计算结果并入栈</li></ul><p>遍历完成后操作数栈栈顶元素即为结果。</p><p><strong>代码实现如下：</strong></p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">parseBoolExpr</span><span class="params">(String expression)</span> </span>&#123;</span><br><span class="line">        Stack&lt;Character&gt; opr = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        Stack&lt;Character&gt; ope = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">        <span class="keyword">int</span> flag;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; expression.length(); i++) &#123;</span><br><span class="line">            <span class="keyword">char</span> s = expression.charAt(i);</span><br><span class="line">            <span class="keyword">switch</span> (s) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;|&#x27;</span>:</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;&amp;&#x27;</span>:</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;!&#x27;</span>:</span><br><span class="line">                    opr.push(s);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;,&#x27;</span>:</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;)&#x27;</span>:</span><br><span class="line">                    <span class="keyword">char</span> op = opr.pop();</span><br><span class="line">                    <span class="keyword">char</span> c;</span><br><span class="line">                    flag = <span class="number">0</span>;</span><br><span class="line">                    <span class="keyword">switch</span> (op) &#123;</span><br><span class="line">                        <span class="keyword">case</span> <span class="string">&#x27;|&#x27;</span>:</span><br><span class="line">                            <span class="keyword">while</span>((c=ope.pop()) != <span class="string">&#x27;(&#x27;</span>) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (c == <span class="string">&#x27;t&#x27;</span>)</span><br><span class="line">                                    flag = <span class="number">1</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="keyword">if</span> (flag == <span class="number">1</span>)</span><br><span class="line">                                ope.push(<span class="string">&#x27;t&#x27;</span>);</span><br><span class="line">                            <span class="keyword">else</span> ope.push(<span class="string">&#x27;f&#x27;</span>);</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">case</span> <span class="string">&#x27;&amp;&#x27;</span>:</span><br><span class="line">                            <span class="keyword">while</span>((c=ope.pop()) != <span class="string">&#x27;(&#x27;</span>) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (c == <span class="string">&#x27;f&#x27;</span>)</span><br><span class="line">                                    flag = <span class="number">1</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="keyword">if</span> (flag == <span class="number">1</span>)</span><br><span class="line">                                ope.push(<span class="string">&#x27;f&#x27;</span>);</span><br><span class="line">                            <span class="keyword">else</span> ope.push(<span class="string">&#x27;t&#x27;</span>);</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">case</span> <span class="string">&#x27;!&#x27;</span>:</span><br><span class="line">                            <span class="keyword">while</span>((c=ope.pop()) != <span class="string">&#x27;(&#x27;</span>) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (c == <span class="string">&#x27;f&#x27;</span>)</span><br><span class="line">                                    flag = <span class="number">1</span>;</span><br><span class="line">                                <span class="keyword">else</span> flag = <span class="number">0</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="keyword">if</span> (flag == <span class="number">1</span>) ope.push(<span class="string">&#x27;t&#x27;</span>);</span><br><span class="line">                            <span class="keyword">else</span> ope.push(<span class="string">&#x27;f&#x27;</span>);</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">default</span>:</span><br><span class="line">                            System.out.println(<span class="string">&quot;表达式错误，结果无效！&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    ope.push(s);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ope.pop();</span><br><span class="line">        <span class="keyword">return</span> ope.pop() == <span class="string">&#x27;t&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> 算法 </tag>
+            
+            <tag> Dijkstra 双栈算法 </tag>
+            
+            <tag> 力扣 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Javascript异步与Promise</title>
       <link href="/2021/10/23/Javascript%E5%BC%82%E6%AD%A5%E4%B8%8EPromise/"/>
       <url>/2021/10/23/Javascript%E5%BC%82%E6%AD%A5%E4%B8%8EPromise/</url>
@@ -134,11 +165,11 @@
       
         <tags>
             
+            <tag> 数据结构 </tag>
+            
             <tag> C </tag>
             
             <tag> BFS </tag>
-            
-            <tag> 数据结构 </tag>
             
         </tags>
       
